@@ -12,9 +12,17 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+export const dynamicParams = true
+export const dynamic = 'force-dynamic'
+
 export async function generateStaticParams() {
-  const posts = await getPublishedBlogPosts()
-  return posts.map((p) => ({ slug: p.slug }))
+  try {
+    const posts = await getPublishedBlogPosts()
+    return posts.map((p) => ({ slug: p.slug }))
+  } catch (err) {
+    console.warn("Could not generate static params for blog at build time:", err)
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

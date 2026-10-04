@@ -28,43 +28,54 @@ function splitBody(body: string) {
 }
 
 export async function getPublishedBlogPosts(): Promise<BlogPostView[]> {
-  const dbPosts = await prisma.blogPost.findMany({
-    where: { published: true },
-    orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
-  })
+  try {
+    const dbPosts = await prisma.blogPost.findMany({
+      where: { published: true },
+      orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+    })
 
-  if (dbPosts.length === 0) {
+    if (dbPosts.length === 0) {
+      return staticPosts
+    }
+
+    return dbPosts.map((post) => ({
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt,
+      date: formatDate(post.publishedAt ?? post.createdAt),
+      image: post.image,
+      category: post.category,
+      content: splitBody(post.body),
+    }))
+  } catch (error) {
+    console.warn('Could not query blog posts from DB, falling back to static posts:', error)
     return staticPosts
   }
-
-  return dbPosts.map((post) => ({
-    title: post.title,
-    slug: post.slug,
-    excerpt: post.excerpt,
-    date: formatDate(post.publishedAt ?? post.createdAt),
-    image: post.image,
-    category: post.category,
-    content: splitBody(post.body),
-  }))
 }
 
 export async function getPublishedBlogPostBySlug(slug: string): Promise<BlogPostView | null> {
-  const post = await prisma.blogPost.findUnique({
-    where: { slug },
-  })
+  try {
+    const post = await prisma.blogPost.findUnique({
+      where: { slug },
+    })
 
-  if (!post || !post.published) {
+    if (!post || !post.published) {
+      const staticPost = staticPosts.find((item) => item.slug === slug)
+      return staticPost ?? null
+    }
+
+    return {
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt,
+      date: formatDate(post.publishedAt ?? post.createdAt),
+      image: post.image,
+      category: post.category,
+      content: splitBody(post.body),
+    }
+  } catch (error) {
+    console.warn(`Could not fetch blog post "${slug}" from DB, falling back to static post:`, error)
     const staticPost = staticPosts.find((item) => item.slug === slug)
     return staticPost ?? null
-  }
-
-  return {
-    title: post.title,
-    slug: post.slug,
-    excerpt: post.excerpt,
-    date: formatDate(post.publishedAt ?? post.createdAt),
-    image: post.image,
-    category: post.category,
-    content: splitBody(post.body),
   }
 }

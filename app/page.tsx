@@ -10,6 +10,8 @@ import { ContactCta } from "@/components/contact-cta"
 import { Footer } from "@/components/footer"
 import { getLandingPageData } from "@/lib/landing-page-data"
 
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   const landingData = await getLandingPageData()
 
