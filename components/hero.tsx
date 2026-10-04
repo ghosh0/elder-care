@@ -2,14 +2,22 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, Shield, Clock, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { RichHtml } from "@/components/ui/rich-html"
+import { HeroSectionData, defaultLandingPageData } from "@/lib/landing-page-data"
 
-const highlights = [
-  { icon: Shield, label: "Trusted & Verified Caregivers" },
-  { icon: Clock, label: "24/7 Emergency Support" },
-  { icon: Heart, label: "Compassionate Companionship" },
-]
+const iconMap: Record<string, React.ElementType> = {
+  Shield,
+  Clock,
+  Heart,
+}
 
-export function Hero() {
+interface HeroProps {
+  data?: HeroSectionData
+}
+
+export function Hero({ data = defaultLandingPageData.hero }: HeroProps) {
+  const content = data || defaultLandingPageData.hero
+
   return (
     <section
       id="home"
@@ -21,71 +29,92 @@ export function Hero() {
       <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row lg:gap-16">
         {/* Text content */}
         <div className="flex flex-1 flex-col items-center text-center lg:items-start lg:text-left">
-          <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-            Trusted by 500+ Families Nationwide
-          </span>
+          {content.badge && (
+            <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              {content.badge}
+            </span>
+          )}
 
-          <h1 className="text-balance font-serif text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl">
-            Caring for Those Who{" "}
-            <span className="text-primary">Cared for Us</span>
-          </h1>
+          <RichHtml
+            as="h1"
+            content={content.titleHtml}
+            className="text-balance font-serif text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl"
+          />
 
-          <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
-            We are your presence in your absence. Ayushman Elder Care Service provides premium
-            elder care services including companionship, medical support, home
-            nursing, and complete care management for your loved ones.
-          </p>
+          <RichHtml
+            as="div"
+            content={content.subtitleHtml}
+            className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground"
+          />
 
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row">
             <Button size="lg" asChild className="gap-2">
-              <Link href="/#contact">
-                Get Started Today
+              <Link href={content.primaryBtnLink || "/#contact"}>
+                {content.primaryBtnText || "Get Started Today"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/#services">Explore Our Services</Link>
-            </Button>
+            {content.secondaryBtnText && (
+              <Button size="lg" variant="outline" asChild>
+                <Link href={content.secondaryBtnLink || "/#services"}>
+                  {content.secondaryBtnText}
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Trust badges */}
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-8">
-            {highlights.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center gap-2 text-sm text-muted-foreground"
-              >
-                <item.icon className="h-5 w-5 text-primary" />
-                <span>{item.label}</span>
-              </div>
-            ))}
-          </div>
+          {content.highlights && content.highlights.length > 0 && (
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-8">
+              {content.highlights.map((item, idx) => {
+                const IconComponent = (item.icon && iconMap[item.icon]) || Shield
+                return (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 text-sm text-muted-foreground"
+                  >
+                    <IconComponent className="h-5 w-5 text-primary" />
+                    <span>{item.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Hero image */}
         <div className="relative flex-1">
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-            <Image
-              src="/images/hero-elder-care.jpg"
-              alt="Caregiver spending quality time with an elderly person"
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
+            {content.image ? (
+              <Image
+                src={content.image}
+                alt="Caregiver spending quality time with an elderly person"
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized={content.image.startsWith('http')}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+                No hero image set
+              </div>
+            )}
           </div>
           {/* Floating card */}
-          <div className="absolute -bottom-4 -left-4 rounded-xl border border-border bg-card p-4 shadow-lg md:-bottom-6 md:-left-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                <Heart className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">500+</p>
-                <p className="text-sm text-muted-foreground">Happy Families</p>
+          {content.statNumber && (
+            <div className="absolute -bottom-4 -left-4 rounded-xl border border-border bg-card p-4 shadow-lg md:-bottom-6 md:-left-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <Heart className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{content.statNumber}</p>
+                  <p className="text-sm text-muted-foreground">{content.statLabel}</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>

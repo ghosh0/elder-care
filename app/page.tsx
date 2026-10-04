@@ -4,26 +4,27 @@ import { About } from "@/components/about"
 import { Services } from "@/components/services"
 import { HowItWorks } from "@/components/how-it-works"
 import { Stats } from "@/components/stats"
-import { Testimonials } from "@/components/testimonials"
 import { FAQ } from "@/components/faq"
 import { BlogPreview } from "@/components/blog-preview"
 import { ContactCta } from "@/components/contact-cta"
 import { Footer } from "@/components/footer"
+import { getLandingPageData } from "@/lib/landing-page-data"
 
-export default function Home() {
+export default async function Home() {
+  const landingData = await getLandingPageData()
+
   return (
     <>
       <Navbar />
       <main>
-        <Hero />
-        <About />
+        <Hero data={landingData.hero} />
+        <About data={landingData.about} />
         <Services />
-        <HowItWorks />
-        <Stats />
-        {/* <Testimonials /> */}
-        <FAQ />
+        <HowItWorks data={landingData.howItWorks} />
+        <Stats stats={landingData.stats} />
+        <FAQ data={landingData.faq} />
         <BlogPreview />
-        <ContactCta />
+        <ContactCta data={landingData.contact} />
       </main>
       <Footer />
     </>

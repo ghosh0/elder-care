@@ -16,11 +16,13 @@ interface Props {
 export default async function InquiryDetailPage({ params }: Props) {
   const { adminUser } = await requireInquiryViewSession()
   const { id } = await params
-  const canManageInquiry = [
-    AdminRole.SUPER_ADMIN,
-    AdminRole.ADMIN,
-    AdminRole.COORDINATOR,
-  ].includes(adminUser.role)
+  const canManageInquiry = (
+    [
+      AdminRole.SUPER_ADMIN,
+      AdminRole.ADMIN,
+      AdminRole.COORDINATOR,
+    ] as AdminRole[]
+  ).includes(adminUser.role)
 
   const inquiry = await prisma.consultationRequest.findUnique({
     where: { id },

@@ -6,32 +6,38 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { ContactSectionData, defaultLandingPageData } from "@/lib/landing-page-types"
 
-const contactInfo = [
-  {
-    icon: Phone,
-    label: "Call Us",
-    value: "9883608282 / 6290601110",
-    href: "tel:+919883608282",
-  },
-  {
-    icon: Mail,
-    label: "Email Us",
-    value: "ayushmanecs@gmail.com",
-    href: "mailto:ayushmanecs@gmail.com",
-  },
-  {
-    icon: MapPin,
-    label: "Visit Us",
-    value: "Narendrapur Station Road",
-    href: "#",
-  },
-]
+interface ContactCtaProps {
+  data?: ContactSectionData
+}
 
-export function ContactCta() {
+export function ContactCta({ data = defaultLandingPageData.contact }: ContactCtaProps) {
+  const content = data || defaultLandingPageData.contact
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const contactCards = [
+    {
+      icon: Phone,
+      label: "Call Us",
+      value: content.phone || "9883608282 / 6290601110",
+      href: `tel:${(content.phone || "").split("/")[0].trim()}`,
+    },
+    {
+      icon: Mail,
+      label: "Email Us",
+      value: content.email || "ayushmanecs@gmail.com",
+      href: `mailto:${content.email || "ayushmanecs@gmail.com"}`,
+    },
+    {
+      icon: MapPin,
+      label: "Visit Us",
+      value: content.address || "Narendrapur Station Road",
+      href: "#",
+    },
+  ]
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -59,38 +65,42 @@ export function ContactCta() {
         body: JSON.stringify(payload),
       })
 
+      const result = await response.json().catch(() => ({}))
+
       if (!response.ok) {
-        setError("Unable to submit right now. Please try again in a moment.")
-        return
+        throw new Error(result.error || "Failed to submit request.")
       }
 
       setSubmitted(true)
       form.reset()
-    } catch {
-      setError("Unable to submit right now. Please try again in a moment.")
+    } catch (err: any) {
+      setError(err.message || "Failed to send message. Please try again.")
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <section id="contact" className="py-20 md:py-28">
+    <section id="contact" className="bg-secondary/50 py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex flex-col gap-12 lg:flex-row lg:gap-16">
           {/* Left side - info */}
           <div className="flex flex-1 flex-col">
-            <span className="text-sm font-semibold uppercase tracking-widest text-primary">
-              Contact
-            </span>
+            {content.badge && (
+              <span className="text-sm font-semibold uppercase tracking-widest text-primary">
+                {content.badge}
+              </span>
+            )}
             <h2 className="mt-4 font-serif text-3xl font-bold text-foreground md:text-4xl">
-              Ready to Experience Our Services?
+              {content.title || "Ready to Experience Our Services?"}
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-              {"Let's start planning the best care for your loved ones. Reach out and we'll connect you with a care advisor."}
+              {content.subtitle ||
+                "Let's start planning the best care for your loved ones. Reach out and we'll connect you with a care advisor."}
             </p>
 
             <div className="mt-8 flex flex-col gap-6">
-              {contactInfo.map((item) => (
+              {contactCards.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
@@ -156,7 +166,7 @@ export function ContactCta() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       name="email"
@@ -167,31 +177,34 @@ export function ContactCta() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone">Phone (Optional)</Label>
                     <Input
                       id="phone"
                       name="phone"
                       type="tel"
-                      placeholder="+91 1234567890"
+                      placeholder="+91 98765 43210"
                     />
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="message">Message</Label>
+                    <Label htmlFor="message">How can we help?</Label>
                     <Textarea
                       id="message"
                       name="message"
-                      placeholder="Tell us about your care needs..."
+                      placeholder="Tell us about your family member's care needs..."
                       rows={4}
                       required
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="gap-2" disabled={submitting}>
+                  {error ? (
+                    <p className="text-sm text-destructive">{error}</p>
+                  ) : null}
+
+                  <Button type="submit" size="lg" disabled={submitting} className="mt-2 gap-2">
                     <Send className="h-4 w-4" />
-                    {submitting ? "Sending..." : "Send Message"}
+                    {submitting ? "Sending..." : "Request Consultation"}
                   </Button>
-                  {error ? <p className="text-sm text-destructive">{error}</p> : null}
                 </form>
               )}
             </div>

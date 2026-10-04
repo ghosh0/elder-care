@@ -180,3 +180,22 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+model LandingPageContent {
+  id        String   @id @default("default")
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminPasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  otpHash   String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}

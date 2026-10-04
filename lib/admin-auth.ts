@@ -88,7 +88,7 @@ export async function logAdminAction(input: {
       action: input.action,
       entityType: input.entityType,
       entityId: input.entityId,
-      metadata: input.metadata,
+      metadata: input.metadata as any,
     },
   })
 }

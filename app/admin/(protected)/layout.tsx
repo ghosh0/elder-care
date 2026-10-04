@@ -17,17 +17,29 @@ export default async function ProtectedAdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const { adminUser } = await requireAdminSession()
-  const canViewInquiries = [
-    AdminRole.SUPER_ADMIN,
-    AdminRole.ADMIN,
-    AdminRole.COORDINATOR,
-    AdminRole.SUPPORT,
-  ].includes(adminUser.role)
-  const canManageBlog = [
-    AdminRole.SUPER_ADMIN,
-    AdminRole.ADMIN,
-    AdminRole.CONTENT_MANAGER,
-  ].includes(adminUser.role)
+  const canViewInquiries = (
+    [
+      AdminRole.SUPER_ADMIN,
+      AdminRole.ADMIN,
+      AdminRole.COORDINATOR,
+      AdminRole.SUPPORT,
+    ] as AdminRole[]
+  ).includes(adminUser.role)
+  const canManageBlog = (
+    [
+      AdminRole.SUPER_ADMIN,
+      AdminRole.ADMIN,
+      AdminRole.CONTENT_MANAGER,
+    ] as AdminRole[]
+  ).includes(adminUser.role)
+  const canManageLanding = (
+    [
+      AdminRole.SUPER_ADMIN,
+      AdminRole.ADMIN,
+      AdminRole.CONTENT_MANAGER,
+      AdminRole.COORDINATOR,
+    ] as AdminRole[]
+  ).includes(adminUser.role)
   const canManageTeam = adminUser.role === AdminRole.SUPER_ADMIN
 
   return (
@@ -55,6 +67,14 @@ export default async function ProtectedAdminLayout({
             <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary">
               Dashboard
             </Link>
+            {canManageLanding ? (
+              <Link
+                href="/admin/landing"
+                className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                Landing Page
+              </Link>
+            ) : null}
             {canViewInquiries ? (
               <Link
                 href="/admin/inquiries"
@@ -73,6 +93,19 @@ export default async function ProtectedAdminLayout({
                 Team
               </Link>
             ) : null}
+
+            {/* Account section */}
+            <div className="pt-3">
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Account
+              </p>
+              <Link
+                href="/admin/change-password"
+                className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                🔑 Change Password
+              </Link>
+            </div>
           </nav>
         </aside>
         <section>{children}</section>

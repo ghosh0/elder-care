@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { hashPassword } from 'better-auth/crypto'
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, AdminRole } from '@prisma/client'
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -14,7 +14,7 @@ const superAdminSeed = {
   name: 'Rajdip Ghosh',
   email: 'rajdipghosh24680@gmail.com',
   password: 'ChangeMe@12345',
-  role: 'SUPER_ADMIN',
+  role: AdminRole.SUPER_ADMIN,
   isActive: true,
   emailVerified: true,
 }
